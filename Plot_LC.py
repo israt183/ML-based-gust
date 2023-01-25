@@ -1,10 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Sat Aug  6 14:04:50 2022
-
-@author: itu
-"""
 
 import numpy as np
 import math
@@ -47,8 +42,7 @@ for i in range(len(SS)):
     
     temp_mae = MAE.loc[(MAE['Sample_size']==SS[i]), 'Value'].mean()
     MAE_avg.loc[len(MAE_avg)]=[temp_mae, SS[i]] 
-
-#%%    
+   
 import seaborn as sns
 
 Bias_curve=sns.lineplot(x='Sample_size', y='Avg', ci=None, marker='o',
@@ -70,9 +64,7 @@ RMSE_curve=sns.lineplot(x='Sample_size', y='Avg', ci=None, marker='o',
               data=RMSE_avg,lw=1)
 RMSE_curve.set_xlabel("Training sample size (Number of storms)", fontsize = 15)
 RMSE_curve.set_ylabel("RMSE (m/s)", fontsize = 15)
-#plt.ylim(0, 5) 
-#FIXME
-#plot_file_name="LC_RF_RMSE.jpg"
+
 plot_file_name="DC_RF_RMSE.jpg"
 RMSE_curve.figure.savefig(plot_file_name,bbox_inches='tight',
                     format='jpeg',
@@ -83,22 +75,18 @@ CRMSE_curve=sns.lineplot(x='Sample_size', y='Avg', ci=None, marker='o',
               data=CRMSE_avg,lw=1)
 CRMSE_curve.set_xlabel("Training sample size (Number of storms)", fontsize = 15)
 CRMSE_curve.set_ylabel("CRMSE (m/s)", fontsize = 15)
-#plt.ylim(0, 5) 
-#FIXME
-#plot_file_name="LC_RF_CRMSE.jpg"
+
 plot_file_name="DC_RF_CRMSE.jpg"
 CRMSE_curve.figure.savefig(plot_file_name,bbox_inches='tight',
                     format='jpeg',
                     dpi=300)
-plt.show()
+
 
 MAE_curve=sns.lineplot(x='Sample_size', y='Avg', ci=None, marker='o',
               data=MAE_avg,lw=1)
 MAE_curve.set_xlabel("Training sample size (Number of storms)", fontsize = 15)
 MAE_curve.set_ylabel("MAE (m/s)", fontsize = 15)
-#FIXME
-#plot_file_name="LC_RF_MAE.jpg"
-#plt.ylim(0, 5) 
+
 plot_file_name="DC_RF_MAE.jpg"
 MAE_curve.figure.savefig(plot_file_name,bbox_inches='tight',
                     format='jpeg',
