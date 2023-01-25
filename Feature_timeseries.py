@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# © 2021-2023 Israt Jahan, University of Connecticut. All rigts reserved.
+© 2021-2023 Israt Jahan, University of Connecticut. All rigts reserved.
 import pandas as pd 
 import numpy as np
 import matplotlib.pyplot as plt
