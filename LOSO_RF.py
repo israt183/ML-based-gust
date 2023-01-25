@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Wed Jan 19 20:36:18 2022
 
-@author: itu
-"""
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -19,7 +15,6 @@ from sklearn.metrics import mean_absolute_error
 
 cd=os.getcwd()
 
-#Path_merged='/Volumes/Disk 2/Study/UCONN/Research/ML_WG_project/Merged_obs_WRF/'
 Path_merged=cd+'/Combined_obsWRF/'
 #importing the csv files
 RW1=pd.read_csv(Path_merged+"Sorted_merged_obs_WRF_10.csv",sep=',')
@@ -33,8 +28,7 @@ RW2=RW2.drop(['index'],axis = 1)
 RW3=RW3.drop(['index'],axis = 1)
 
 RW_comb=pd.concat([RW1,RW2,RW3],axis=0,ignore_index=True)
-#RW_comb.reset_index(inplace=True)
-#RW_comb.to_csv('RW_combined_48_events.csv', index = False)
+
 
 ## Converting units of the following features: PSFC(Pa),POT_2m(K),PBLH(m)
 ## change PSFC to kPa from Pa, PBLH to km and POT_2m to deg C
@@ -53,9 +47,8 @@ RW_comb['PBLH(m)']= RW_comb['PBLH(m)'].apply(to_km)
 RW_comb = RW_comb.rename({'PSFC(Pa)': 'PSFC(kPa)', 'POT_2m(K)': 'POT_2m(C)','PBLH(m)':'PBLH(km)'}, axis=1)
 RW_comb.head()
 
-#FIXME
+
 RW_comb['Valid_Time_x'] = pd.to_datetime(RW_comb['Valid_Time_x'], format='%Y%m%d%H')
-#column index of "Valid_Time_x" is 23
 a=RW_comb.at[0,'Valid_Time_x']
 # empty list row_index will be used to store how many rows of the dataframe belong to each storm
 row_index=[]
@@ -68,11 +61,8 @@ for i in range(len(RW_comb)):
     else:
         a=RW_comb.iloc[i,23]
         row_index.append(i)
-
-    
+   
 row_index=[0]+row_index+[len(RW_comb)]
-# 1st row_index(0) is the row index of the beginning of 1st event in RW_comb, 2nd row_index(1) is the row index of the beginning of 2nd event in RW_comb,
-#row index(47) is the row index of the begnning of last event in RW_comb and row index(48) is the index of the end of the last event+1  
 
 #Number of events in the dataset
 Total_events=48
@@ -100,7 +90,7 @@ all_BIAS_train=[]
 all_RMSE_train=[]
 all_CRMSE_train=[]
 all_MAE_train=[]
-#j=2
+
 for j in range(int(r)):
     #the no. of test events
     Test_events=np.arange(j*Test_storms,(j+1)*Test_storms)
@@ -123,16 +113,6 @@ for j in range(int(r)):
     # Creating dataframe for the input features by dropping highly correlated attributes
     X_train= X_train.drop(['PSFC(kPa)','POT_2m(C)','T2(K)','Pot_temp_grad(1km_sfc)','Pot_temp_grad(2km_sfc)','Pot_temp_grad(PBLH_sfc)'],axis=1)
     X_test=X_test.drop(['PSFC(kPa)','POT_2m(C)','T2(K)','Pot_temp_grad(1km_sfc)','Pot_temp_grad(2km_sfc)','Pot_temp_grad(PBLH_sfc)'],axis=1)
-    #Scaling the data
-    #Before modeling, we need to “center” and “standardize” our data by scaling. 
-    #We scale to control for the fact that different variables are measured on different scales. 
-    #We scale so that each predictor can have a “fair fight” against each other in deciding importance.
-# =============================================================================
-#     from sklearn.preprocessing import StandardScaler
-#     ss = StandardScaler()
-#     X_train_scaled = ss.fit_transform(X_train)
-#     X_test_scaled = ss.transform(X_test)
-# =============================================================================
     
     #convert “Y_train” from a Pandas “Series” object into a NumPy array for the model 
     #to accept the target training data while fitting the model
@@ -141,7 +121,6 @@ for j in range(int(r)):
     
     
     from sklearn.ensemble import RandomForestRegressor
-    #FIXME
     RF = RandomForestRegressor(random_state=10,n_jobs=-1)
     RF.fit(X_train, Y_train)
     Y_pred = RF.predict(X_test)
@@ -229,15 +208,9 @@ for j in range(int(r)):
         plt.grid(b=None, which='major', axis='both',linestyle=':')
         ax.set_xlim([MINXY,MAXXY])
         ax.set_ylim([MINXY,MAXXY]) 
-    #fig = plt.figure(figsize=(5,5))
     Heat_bin_plots(5,35,0.5,Y_pred,Y_test,c_min,c_max,1,1,1,1)
-    plt.savefig(cd+'/LOSO_48storms_UPP_as_feature/RF_baseline'+str(j)+'.png',dpi=300,bbox_inches='tight')
-    plt.close()
+
     #Feature importance_permutation method
-    #This method will randomly shuffle each feature and compute the change in the model’s performance. 
-    #The features which impact the performance the most are the most important one.
-    #The permutation based importance is computationally expensive. 
-    #The permutation based method can have problem with highly-correlated features, it can report them as unimportant.
     from sklearn.inspection import permutation_importance
     perm_importance = permutation_importance(RF, X_train, Y_train,scoring='neg_mean_squared_error')
     sorted_idx = perm_importance.importances_mean.argsort()
@@ -245,21 +218,6 @@ for j in range(int(r)):
     plt.barh(X_train.columns[sorted_idx], perm_importance.importances_mean[sorted_idx])
     plt.xlabel("Increase in MSE")
     plt.title("Permutation importance")
-    
-    plt.savefig(cd+'/LOSO_48storms_UPP_as_feature/RF_baseline_FI'+str(j)+'.png',
-                dpi=300,bbox_inches='tight')
-    plt.close()   
-    
-    #Random Forest Built-in Feature Importance
-    #Mean Decrease Accuracy method
-# =============================================================================
-#     RF.feature_importances_
-#     sorted_idx = RF.feature_importances_.argsort()
-#     plt.barh(X_train.columns[sorted_idx], RF.feature_importances_[sorted_idx])
-#     plt.xlabel("Random Forest Feature Importance")
-#     plt.savefig(r'/Volumes/Disk 2/Study/UCONN/Research/ML_WG_project/ML_code_output/RF_baseline_FIbuiltinRF'+str(j)+'.png',
-#                 dpi=300,bbox_inches='tight')
-# =============================================================================
     
     all_MSE_RF.append(MSE)
     all_BIAS_RF.append(BIAS)
@@ -324,9 +282,6 @@ for j in range(int(r)):
         ax.set_xlim([MINXY,MAXXY])
         ax.set_ylim([MINXY,MAXXY])
     Heat_bin_plots(5,35,0.5,UPP_test,Y_test,c_min,c_max,1,1,1,1)
-    plt.savefig(cd+'/LOSO_48storms_UPP_as_feature/UPP_vs_Obs_test_set'+str(j)+'.png',
-                dpi=300,bbox_inches='tight')
-    plt.close()
     
     all_MSE_UPP.append(MSE_UPP)
     all_BIAS_UPP.append(BIAS_UPP)
@@ -341,12 +296,12 @@ for j in range(int(r)):
     Y_pred=pd.DataFrame(Y_pred,columns=['WG_pred_on_testset'])
     UPP_test=pd.DataFrame(UPP_test,columns=['UPP_for_testset'])
     #Saving the test, train, UPP and prediction dataframes as csv
-    X_train.to_csv(cd+'/LOSO_48storms_UPP_as_feature/X_train_'+str(j)+'.csv')
-    Y_train.to_csv(cd+'/LOSO_48storms_UPP_as_feature/Y_train_'+str(j)+'.csv')
-    X_test.to_csv(cd+'/LOSO_48storms_UPP_as_feature/X_test_'+str(j)+'.csv')
-    Y_test.to_csv(cd+'/LOSO_48storms_UPP_as_feature/Y_test_'+str(j)+'.csv')
-    Y_pred.to_csv(cd+'/LOSO_48storms_UPP_as_feature/Y_pred_'+str(j)+'.csv')
-    UPP_test.to_csv(cd+'/LOSO_48storms_UPP_as_feature/UPP_test_'+str(j)+'.csv')
+    X_train.to_csv('X_train_'+str(j)+'.csv')
+    Y_train.to_csv('Y_train_'+str(j)+'.csv')
+    X_test.to_csv('X_test_'+str(j)+'.csv')
+    Y_test.to_csv('Y_test_'+str(j)+'.csv')
+    Y_pred.to_csv('Y_pred_'+str(j)+'.csv')
+    UPP_test.to_csv('UPP_test_'+str(j)+'.csv')
     
     # save the model to disk
     #filename = r'/Volumes/Disk 2/Study/UCONN/Research/ML_WG_project/ML_code_output/Tuned_model_allX.sav'
@@ -430,7 +385,7 @@ Error_UPP=pd.concat([Avg_MSE_UPP,Avg_BIAS_UPP,Avg_RMSE_UPP,Avg_CRMSE_UPP,Avg_MAE
 Error_UPP=Error_UPP.to_frame()
 Error_UPP['Error_metric'] = Names
 
-Error_RF.to_csv(cd+'/LOSO_48storms_UPP_as_feature/Average_Error_RF_test.csv', index = False)
-Error_train.to_csv(cd+'/LOSO_48storms_UPP_as_feature/Average_Error_RF_train.csv', index = False)
-Error_UPP.to_csv(cd+'/LOSO_48storms_UPP_as_feature/Average_Error_UPP_test.csv', index = False)
+Error_RF.to_csv('Average_Error_RF_test.csv', index = False)
+Error_train.to_csv('Average_Error_RF_train.csv', index = False)
+Error_UPP.to_csv('Average_Error_UPP_test.csv', index = False)
 
