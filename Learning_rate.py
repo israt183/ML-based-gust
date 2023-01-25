@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Tue Jun 28 16:10:00 2022
 
-@author: itu
-"""
 
 import numpy as np
 import math
@@ -24,7 +20,6 @@ import random
 
 cd=os.getcwd()
 
-#Path_merged='/Volumes/Disk 2/Study/UCONN/Research/ML_WG_project/Merged_obs_WRF/'
 Path_merged=cd+'/Combined_obsWRF/'
 #importing the csv files
 RW1=pd.read_csv(Path_merged+"Sorted_merged_obs_WRF_10.csv",sep=',')
@@ -55,9 +50,8 @@ RW_comb['PBLH(m)']= RW_comb['PBLH(m)'].apply(to_km)
 RW_comb = RW_comb.rename({'PSFC(Pa)': 'PSFC(kPa)', 'POT_2m(K)': 'POT_2m(C)','PBLH(m)':'PBLH(km)'}, axis=1)
 RW_comb.head()
 
-#FIXME
+
 RW_comb['Valid_Time_x'] = pd.to_datetime(RW_comb['Valid_Time_x'], format='%Y%m%d%H')
-#column index of "Valid_Time_x" is 23
 a=RW_comb.at[0,'Valid_Time_x']
 # empty list row_index will be used to store how many rows of the dataframe belong to each storm
 row_index=[]
@@ -84,14 +78,6 @@ Sample_size=5
 r=Training_storms/Sample_size
 Trials=16
 
-#to store error metrics of test storms
-# =============================================================================
-# all_BIAS_RF=[]
-# all_RMSE_RF=[]
-# all_CRMSE_RF=[]
-# all_MAE_RF=[]
-# 
-# =============================================================================
 BIAS_piled=pd.DataFrame()
 RMSE_piled=pd.DataFrame()
 CRMSE_piled=pd.DataFrame()
@@ -195,7 +181,7 @@ for i in range(int(Trials)):
         Y_train = np.array(Y_train)
         Y_train=Y_train.ravel()
     
-        #FIXME hyperparameters
+  
         Tuned_HPs={'n_estimators': 246,
                'max_depth': 16,
                'min_samples_split': 10,
@@ -203,9 +189,8 @@ for i in range(int(Trials)):
                'bootstrap': True,
                'max_samples': 0.095}
     
-        #FIXME
+     
         from sklearn.ensemble import RandomForestRegressor
-        #FIXME n_jobs
         model = RandomForestRegressor(random_state=10,n_jobs=-1,**Tuned_HPs)
         model.fit(X_train_copy, Y_train)
         Y_pred_1 = model.predict(X_test_1)
@@ -313,60 +298,3 @@ RMSE_piled.to_csv(cd+'/RMSE_all_trials'+'.csv', index = False)
 CRMSE_piled.to_csv(cd+'/CRMSE_all_trials'+'.csv', index = False)
 MAE_piled.to_csv(cd+'/MAE_all_trials'+'.csv', index = False)
     
-#%%
-# =============================================================================
-# import seaborn as sns
-# 
-# Bias_curve=sns.lineplot(x='Sample_size', y='Value', ci=None, marker='o',
-#              data=all_BIAS_RF,lw=1)
-# Bias_curve.set_xlabel("Training sample size (Number of storms)", fontsize = 15)
-# Bias_curve.set_ylabel("Bias (m/s)", fontsize = 15)
-# #plt.ylim(-2, 2)
-# #FIXME 
-# #plot_file_name="LC_RF_bias.jpg"
-# plot_file_name="LC_RF_bias_new.jpg"
-# Bias_curve.figure.savefig(plot_file_name,bbox_inches='tight',
-#                     format='jpeg',
-#                     dpi=300)
-# 
-#  
-# plt.show()
-# 
-# RMSE_curve=sns.lineplot(x='Sample_size', y='Value', ci=None, marker='o',
-#              data=all_RMSE_RF,lw=1)
-# RMSE_curve.set_xlabel("Training sample size (Number of storms)", fontsize = 15)
-# RMSE_curve.set_ylabel("RMSE (m/s)", fontsize = 15)
-# #plt.ylim(0, 5) 
-# #FIXME
-# #plot_file_name="LC_RF_RMSE.jpg"
-# plot_file_name="LC_RF_RMSE_new.jpg"
-# RMSE_curve.figure.savefig(plot_file_name,bbox_inches='tight',
-#                     format='jpeg',
-#                     dpi=300)
-# plt.show()  
-#     
-# CRMSE_curve=sns.lineplot(x='Sample_size', y='Value', ci=None, marker='o',
-#              data=all_CRMSE_RF,lw=1)
-# CRMSE_curve.set_xlabel("Training sample size (Number of storms)", fontsize = 15)
-# CRMSE_curve.set_ylabel("CRMSE (m/s)", fontsize = 15)
-# #plt.ylim(0, 5) 
-# #FIXME
-# #plot_file_name="LC_RF_CRMSE.jpg"
-# plot_file_name="LC_RF_CRMSE_new.jpg"
-# CRMSE_curve.figure.savefig(plot_file_name,bbox_inches='tight',
-#                     format='jpeg',
-#                     dpi=300)
-# plt.show()
-# 
-# MAE_curve=sns.lineplot(x='Sample_size', y='Value', ci=None, marker='o',
-#              data=all_MAE_RF,lw=1)
-# MAE_curve.set_xlabel("Training sample size (Number of storms)", fontsize = 15)
-# MAE_curve.set_ylabel("MAE (m/s)", fontsize = 15)
-# #FIXME
-# #plot_file_name="LC_RF_MAE.jpg"
-# #plt.ylim(0, 5) 
-# plot_file_name="LC_RF_MAE_new.jpg"
-# MAE_curve.figure.savefig(plot_file_name,bbox_inches='tight',
-#                     format='jpeg',
-#                     dpi=300)
-# =============================================================================
