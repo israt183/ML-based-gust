@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Wed Jan 26 13:47:18 2022
 
-@author: itu
-"""
 
 import numpy as np
 import pandas as pd
@@ -20,13 +16,10 @@ import cartopy.feature as cfeature
 from sklearn.metrics import mean_squared_error
 from matplotlib.cm import get_cmap
 
-#from cartopy.feature import NaturalEarthFeature
-#import matplotlib.ticker as mticker
-#from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
+
 
 cd=os.getcwd()
 Path_merged=cd+'/Combined_obsWRF/'
-#Path_station='/Volumes/Disk 2/Study/UCONN/Research/ISD_data/'
 #importing the csv files
 RW1=pd.read_csv(Path_merged+"Sorted_merged_obs_WRF_10.csv",sep=',')
 RW2=pd.read_csv(Path_merged+"Sorted_merged_obs_WRF_14.csv",sep=',')
@@ -78,21 +71,17 @@ Data = df.merge(Station_info,on='Station',how = 'inner')
 
 figure = plt.figure(figsize=(8,6))
 ax = figure.add_subplot(1,1,1, projection=crs.Mercator())
-# adds a stock image as a background
-#ax.stock_img()
 # adds national borders
 ax.add_feature(cfeature.BORDERS)
 # add coastlines
 ax.add_feature(cfeature.COASTLINE)
 #sequence for ax.set_extent: min lon,max lon,min lat,max lat
 ax.set_extent([-79,-68,38 ,47,],crs=crs.PlateCarree())
-#ax.set_extent([-85,-60,35 ,50,],crs=crs.PlateCarree())
 ax.add_feature(cfeature.OCEAN)
 ax.add_feature(cfeature.LAND, color='white',edgecolor='black')
 ax.add_feature(cfeature.STATES,linewidth=0.5, edgecolor='black')
 ax.add_feature(cfeature.RIVERS)
 ax.gridlines()
-#plt.show()
 plt.scatter(
     Data["Lon"],
     Data["Lat"],
@@ -104,6 +93,6 @@ plt.scatter(
     transform=crs.PlateCarree(),
 )
 plt.colorbar().set_label("Avgerage wind gust RMSE (m/s) by WRF ")
-plt.savefig('Avg_RMSE_over_48storms_hsv.png',dpi=300,bbox_inches='tight')
+plt.savefig('Avg_RMSE.png',dpi=300,bbox_inches='tight')
 
 
